@@ -1,0 +1,116 @@
+# Samartha Ayurveda NFC Platform — User Manual
+
+Welcome to the Samartha Ayurveda Smart NFC Business Card Platform. This manual provides step-by-step instructions for Administrators, Employees, and the process of programming physical NFC cards.
+
+---
+
+## 1. Administrator Guide
+
+As an administrator, you have full control over the platform, including user management, gamification settings, broadcasting notices, and exporting analytics.
+
+### 1.1 Logging In
+1. Open your web browser and navigate to the platform URL (e.g., `http://127.0.0.1:5000`).
+2. You will be redirected to the login page.
+3. Enter the admin credentials:
+   - **Username:** `admin`
+   - **Password:** `admin123` (or your configured admin password)
+4. Click **Sign In**. You will be taken to the Admin Dashboard.
+
+### 1.2 System Health & Traffic Heatmap
+- **System Health:** Provides a high-level overview of total users, active cards, total taps, and leads captured.
+- **Traffic Heatmap:** Shows a visual breakdown of recent tap activity across all active cards.
+
+### 1.3 User Control & Card Management
+This section allows you to manage employee accounts and assign NFC cards.
+1. Click **User Control** in the left sidebar.
+2. You will see a list of all registered employees.
+3. **Assigning a Card:** If an employee needs an NFC card, you can assign it here by linking a unique card ID to their account.
+4. **Suspending/Pausing:** You can toggle an employee's status to "Terminated" or pause their card. If a card is paused, anyone tapping the physical card will see a "Card Paused" error page instead of the employee's profile.
+
+### 1.4 Gamification: Daily Quests
+Engage your employees by setting daily scan targets.
+1. Under the **GAMIFICATION** section in the sidebar, click **Daily Quests**.
+2. Select the **Date** for the quest (defaults to today).
+3. Enter the **Target Unique Scans** (e.g., 20).
+4. Enter a **Reward Description** (e.g., "Coffee Voucher").
+5. Click **Save Goal**. The goal will now appear on all employees' dashboards.
+
+### 1.5 Notice Board
+Broadcast announcements to your team.
+1. Click **Notice Board** in the sidebar.
+2. Select the target recipient (e.g., "All Employees" or a specific user).
+3. Type your announcement in the message box.
+4. Click **Send Notice**. Employees will see this in their Inbox.
+
+### 1.6 Export Data
+Download platform analytics for reporting.
+1. Click **Export Data**.
+2. Choose your preferred format:
+   - **Download Excel (.xlsx):** Generates a multi-sheet workbook containing raw tap logs and aggregated employee performance metrics.
+   - **Download Tap Logs (.csv):** Generates a flat CSV file of all taps, useful for importing into BI tools.
+
+---
+
+## 2. Employee Guide
+
+Employees use the platform to customize their digital profiles, track their daily scan goals, and view their leaderboard rankings.
+
+### 2.1 Registration & Login
+1. If you don't have an account, navigate to the platform URL and click **Create one free**.
+2. Fill in your details (Username, Email, Business Name, Password).
+3. Once registered, log in to access your Employee Dashboard.
+
+### 2.2 Profile Customization
+1. Click **Profile & Template** in the sidebar.
+2. Fill out your professional details (Name, Bio, Phone, Address, Social Links).
+3. These details will be displayed on your public digital profile when someone taps your physical NFC card.
+
+### 2.3 Your Digital ID Card
+1. Click **My ID Card** in the sidebar.
+2. This displays your official digital identity card, including your Employee ID, organization name, and contact info. 
+3. A progress bar shows how complete your profile is. Ensure it reaches 100% by filling out all details in the Profile section.
+
+### 2.4 Tracking Goals & Leaderboard
+1. **Daily Goals:** Click **Daily Goals** to view today's target (e.g., "0 / 20 unique scans"). As you tap your card with new clients, this progress bar will fill up. *Note: Only one tap per IP address per day counts towards your goal.*
+2. **Leaderboard:** Click **Leaderboard** to see how you rank against other employees based on weekly scan activity. The top 3 employees are highlighted on the podium.
+
+### 2.5 Inbox
+1. Click **Inbox** to view announcements sent by the Administrator.
+
+---
+
+## 3. NFC Card Programming Guide
+
+To link a physical NFC card to an employee's digital profile, you must program the card with a specific URL.
+
+### Requirements:
+- A blank, rewritable NFC card (e.g., NTAG215).
+- An NFC-enabled smartphone (iOS or Android).
+- The free **NFC Tools** app (available on the App Store and Google Play).
+
+### Step-by-Step Programming:
+1. **Find the Target URL:**
+   - As an admin, assign a card slug (unique ID) to the employee in the **User Control** panel (e.g., `john-doe`).
+   - The target URL for programming will be: `https://your-domain.com/t/john-doe` *(Replace `your-domain.com` with your actual live server domain).*
+2. **Open NFC Tools:**
+   - Launch the **NFC Tools** app on your smartphone.
+3. **Write the URL:**
+   - Tap on **Write**.
+   - Tap on **Add a record**.
+   - Select **URL / URI**.
+   - Enter the target URL (e.g., `https://your-domain.com/t/john-doe`). Ensure you include the `https://` prefix.
+   - Tap **OK**.
+4. **Program the Card:**
+   - Tap **Write / 30 Bytes** (the byte size will vary depending on URL length).
+   - The app will display a prompt saying "Approach an NFC tag".
+   - Hold the physical NFC card against the back of your smartphone (near the top for iPhones, middle/top for Androids).
+   - Wait for the success checkmark.
+5. **Test the Card:**
+   - Tap the card against your phone again (outside of the NFC Tools app).
+   - Your web browser should open, redirect through the tracking link, and land on the employee's digital profile.
+
+> [!IMPORTANT] 
+> **Testing Tip:** If you test the card multiple times from the same phone/Wi-Fi, only the first tap of the day will award gamification points due to the platform's anti-spam (unique IP) tracking.
+
+---
+*End of Manual*

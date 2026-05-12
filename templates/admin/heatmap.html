@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Traffic Heatmap — NFC Hub Admin{% endblock %}
+{% block page_title %}Traffic Heatmap{% endblock %}
+{% block page_subtitle %}Top 20 most-tapped cards in the last 24 hours{% endblock %}
+
+{% block content %}
+<div class="glass-card overflow-hidden">
+  <div class="p-5 border-b border-purple-900/30 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+      <span class="text-sm text-gray-400">Live — Last 24h</span>
+    </div>
+    <span class="text-xs text-gray-500">{{ hot_cards | length }} cards with activity</span>
+  </div>
+
+  {% if hot_cards %}
+  <div class="divide-y divide-purple-900/20">
+    {% for card, tap_count in hot_cards %}
+    {% set pct = (tap_count / hot_cards[0][1] * 100) | int if hot_cards[0][1] > 0 else 0 %}
+    <div class="p-5 flex items-center gap-4 hover:bg-purple-900/10 transition-colors">
+      <!-- Rank -->
+      <div class="w-8 text-center">
+        {% if loop.index <= 3 %}
+        <span class="text-lg">{{ ['🥇','🥈','🥉'][loop.index - 1] }}</span>
+        {% else %}
+        <span class="text-sm font-bold text-gray-500">#{{ loop.index }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Card Info -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-sm font-semibold text-white truncate">{{ card.label or card.unique_id }}</span>
+          <span class="text-xs font-mono text-purple-400 bg-purple-900/30 px-2 py-0.5 rounded">/t/{{ card.unique_id }}</span>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-500">
+          <span>Owner: <span class="text-gray-300">{{ card.owner.username if card.owner else 'Unassigned' }}</span></span>
+          <span>·</span>
+          <span>{{ card.owner.business_name if card.owner else '—' }}</span>
+        </div>
+        <!-- Heat bar -->
+        <div class="mt-2 h-1.5 rounded-full bg-surface-800 overflow-hidden">
+          <div class="h-full rounded-full bg-gradient-to-r from-orange-500 to-rose-500 transition-all"
+               style="width: {{ pct }}%"></div>
+        </div>
+      </div>
+
+      <!-- Tap Count -->
+      <div class="text-right flex-shrink-0">
+        <p class="text-xl font-bold text-orange-400">{{ tap_count }}</p>
+        <p class="text-xs text-gray-500">taps</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="py-20 text-center text-gray-500">
+    <svg class="w-14 h-14 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
+    <p class="text-sm">No card activity in the last 24 hours.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Export Data — Admin{% endblock %}
+{% block page_title %}Export Center{% endblock %}
+{% block page_subtitle %}Download tap logs & employee metrics as Excel or CSV{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
+
+  <!-- Excel Export -->
+  <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-6 flex flex-col">
+    <div class="w-14 h-14 rounded-2xl bg-green-900/30 border border-green-700/30 flex items-center justify-center mb-4">
+      <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    </div>
+    <h2 class="text-lg font-semibold text-white mb-1">Excel Report</h2>
+    <p class="text-sm text-gray-400 mb-4 flex-1">
+      Full multi-sheet Excel workbook with Tap Logs and Employee Metrics on separate sheets.
+    </p>
+    <div class="space-y-2 mb-6">
+      <div class="flex items-center gap-2 text-xs text-gray-400">
+        <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        Sheet 1: Tap Logs ({{ tap_count }} records)
+      </div>
+      <div class="flex items-center gap-2 text-xs text-gray-400">
+        <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        Sheet 2: Employee Metrics ({{ emp_count }} employees)
+      </div>
+      <div class="flex items-center gap-2 text-xs text-gray-400">
+        <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        Includes unique tap flags and points
+      </div>
+    </div>
+    <a href="{{ url_for('admin_export', type='excel') }}" id="export-excel-btn"
+       class="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-green-900/30 text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Download Excel (.xlsx)
+    </a>
+  </div>
+
+  <!-- CSV Export -->
+  <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-6 flex flex-col">
+    <div class="w-14 h-14 rounded-2xl bg-blue-900/30 border border-blue-700/30 flex items-center justify-center mb-4">
+      <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+    </div>
+    <h2 class="text-lg font-semibold text-white mb-1">CSV Export</h2>
+    <p class="text-sm text-gray-400 mb-4 flex-1">
+      Flat CSV file of all tap log records. Compatible with Google Sheets, Power BI, and any spreadsheet app.
+    </p>
+    <div class="space-y-2 mb-6">
+      <div class="flex items-center gap-2 text-xs text-gray-400">
+        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        {{ tap_count }} tap records
+      </div>
+      <div class="flex items-center gap-2 text-xs text-gray-400">
+        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        Card ID, employee, device, timestamp
+      </div>
+      <div class="flex items-center gap-2 text-xs text-gray-400">
+        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        UTF-8 encoded, universally compatible
+      </div>
+    </div>
+    <a href="{{ url_for('admin_export', type='csv') }}" id="export-csv-btn"
+       class="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/30 text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Download Tap Logs (.csv)
+    </a>
+  </div>
+</div>
+
+<!-- Data Summary -->
+<div class="mt-6 max-w-4xl bg-surface-900 border border-purple-900/30 rounded-2xl p-6">
+  <h3 class="text-sm font-semibold text-gray-300 mb-3">Dataset Summary</h3>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="text-center p-3 rounded-xl bg-surface-800">
+      <div class="text-2xl font-bold text-white">{{ tap_count }}</div>
+      <div class="text-xs text-gray-500 mt-1">Total Taps</div>
+    </div>
+    <div class="text-center p-3 rounded-xl bg-surface-800">
+      <div class="text-2xl font-bold text-white">{{ emp_count }}</div>
+      <div class="text-xs text-gray-500 mt-1">Employees</div>
+    </div>
+    <div class="text-center p-3 rounded-xl bg-surface-800">
+      <div class="text-2xl font-bold text-white">2</div>
+      <div class="text-xs text-gray-500 mt-1">Excel Sheets</div>
+    </div>
+    <div class="text-center p-3 rounded-xl bg-surface-800">
+      <div class="text-2xl font-bold text-green-400">Ready</div>
+      <div class="text-xs text-gray-500 mt-1">Export Status</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

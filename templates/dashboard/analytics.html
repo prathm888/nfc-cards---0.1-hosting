@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Analytics — NFC Hub{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block page_subtitle %}Track your tap performance across all cards{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Filters -->
+<div class="glass-card p-5 mb-6 flex flex-wrap gap-4 items-center">
+  <div class="flex items-center gap-2">
+    <label class="text-sm text-gray-400 font-medium">Card:</label>
+    <select id="card-select" class="input-field text-sm py-1.5 w-auto">
+      <option value="all">All Cards</option>
+      {% for card in cards %}
+      <option value="{{ card.id }}">{{ card.label or card.unique_id }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-center gap-2">
+    <label class="text-sm text-gray-400 font-medium">Period:</label>
+    <div class="flex gap-1">
+      {% for d in [7, 14, 30, 90] %}
+      <button onclick="setDays({{ d }})" data-days="{{ d }}"
+              class="day-btn px-3 py-1.5 rounded-lg text-xs font-medium border transition-all {% if d == 30 %}bg-purple-600 border-purple-500 text-white{% else %}bg-surface-800 border-purple-900/30 text-gray-400 hover:text-white{% endif %}">
+        {{ d }}d
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  <button onclick="loadData()" class="btn-primary text-sm px-4 py-1.5">Refresh</button>
+</div>
+
+<!-- Charts Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <!-- Tap Timeline -->
+  <div class="glass-card p-6 xl:col-span-2">
+    <h2 class="text-base font-semibold text-white mb-5">Taps Over Time</h2>
+    <div class="h-64">
+      <canvas id="tapChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Device Breakdown -->
+  <div class="glass-card p-6">
+    <h2 class="text-base font-semibold text-white mb-5">Device Breakdown</h2>
+    <div class="h-48 flex items-center justify-center">
+      <canvas id="deviceChart"></canvas>
+    </div>
+    <div id="device-legend" class="mt-4 space-y-2"></div>
+  </div>
+
+  <!-- Browser Breakdown -->
+  <div class="glass-card p-6 xl:col-span-3">
+    <h2 class="text-base font-semibold text-white mb-5">Top Browsers</h2>
+    <div class="h-48">
+      <canvas id="browserChart"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentDays = 30;
+let tapChart, deviceChart, browserChart;
+
+const chartDefaults = {
+  color: 'rgba(255,255,255,0.7)',
+  borderColor: 'rgba(139,92,246,0.2)',
+};
+Chart.defaults.color = chartDefaults.color;
+Chart.defaults.borderColor = chartDefaults.borderColor;
+
+function setDays(days) {
+  currentDays = days;
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    const active = parseInt(btn.dataset.days) === days;
+    btn.classList.toggle('bg-purple-600', active);
+    btn.classList.toggle('border-purple-500', active);
+    btn.classList.toggle('text-white', active);
+    btn.classList.toggle('bg-surface-800', !active);
+    btn.classList.toggle('border-purple-900/30', !active);
+    btn.classList.toggle('text-gray-400', !active);
+  });
+  loadData();
+}
+
+async function loadData() {
+  const cardId = document.getElementById('card-select').value;
+  const res = await fetch(`/dashboard/analytics/data?days=${currentDays}&card_id=${cardId}`);
+  const data = await res.json();
+
+  // Tap Chart
+  if (tapChart) tapChart.destroy();
+  tapChart = new Chart(document.getElementById('tapChart'), {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'Taps',
+        data: data.values,
+        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(139,92,246,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#8b5cf6',
+        pointRadius: 3,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(139,92,246,0.08)' }, ticks: { maxTicksLimit: 8, font: { size: 11 } } },
+        y: { grid: { color: 'rgba(139,92,246,0.08)' }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+
+  // Device Chart
+  if (deviceChart) deviceChart.destroy();
+  const devLabels = Object.keys(data.devices);
+  const devValues = Object.values(data.devices);
+  const devColors = ['#8b5cf6', '#6366f1', '#a78bfa'];
+  deviceChart = new Chart(document.getElementById('deviceChart'), {
+    type: 'doughnut',
+    data: { labels: devLabels, datasets: [{ data: devValues, backgroundColor: devColors, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      cutout: '70%'
+    }
+  });
+  const legend = document.getElementById('device-legend');
+  legend.innerHTML = devLabels.map((l, i) => `
+    <div class="flex items-center justify-between text-sm">
+      <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${devColors[i]}"></span><span class="text-gray-400 capitalize">${l}</span></span>
+      <span class="font-medium text-white">${devValues[i]}</span>
+    </div>`).join('');
+
+  // Browser Chart
+  if (browserChart) browserChart.destroy();
+  browserChart = new Chart(document.getElementById('browserChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data.browsers),
+      datasets: [{
+        label: 'Taps',
+        data: Object.values(data.browsers),
+        backgroundColor: ['#8b5cf6','#6366f1','#a78bfa','#7c3aed','#4f46e5'],
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(139,92,246,0.08)' }, ticks: { precision: 0 } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+document.getElementById('card-select').addEventListener('change', loadData);
+loadData();
+</script>
+{% endblock %}

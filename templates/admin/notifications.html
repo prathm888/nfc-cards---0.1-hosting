@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Notice Board — Admin{% endblock %}
+{% block page_title %}Notice Board{% endblock %}
+{% block page_subtitle %}Send announcements to employees{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Compose Notice -->
+  <div class="lg:col-span-1">
+    <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-6">
+      <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        Compose Notice
+      </h2>
+      <form method="POST" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1">Target Recipient</label>
+          <select name="target_emp_id" id="target_emp_id"
+                  class="w-full px-4 py-2.5 rounded-xl bg-surface-800 border border-purple-900/40 text-white text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30">
+            <option value="ALL">📢 All Employees</option>
+            {% for emp in employees %}
+            <option value="{{ emp.emp_id or emp.username }}">{{ emp.name or emp.username }} ({{ emp.emp_id or 'no-id' }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1">Message</label>
+          <textarea name="message" id="notice-message" rows="5" required
+                    placeholder="Write your announcement here..."
+                    class="w-full px-4 py-2.5 rounded-xl bg-surface-800 border border-purple-900/40 text-white text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 resize-none"></textarea>
+        </div>
+        <button type="submit" id="send-notice-btn"
+                class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-purple-900/30 text-sm">
+          Send Notice
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sent Notices -->
+  <div class="lg:col-span-2">
+    <div class="bg-surface-900 border border-purple-900/30 rounded-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-purple-900/20">
+        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Sent Notices
+          <span class="ml-auto bg-purple-900/50 text-purple-300 text-xs px-2 py-0.5 rounded-full">{{ notices|length }} total</span>
+        </h2>
+      </div>
+      {% if notices %}
+      <div class="divide-y divide-purple-900/20 max-h-[600px] overflow-y-auto">
+        {% for notice in notices %}
+        <div class="px-6 py-4 hover:bg-surface-800/50 transition-colors">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="flex items-center gap-2">
+              {% if notice.target_emp_id == 'ALL' %}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-900/50 text-indigo-300 text-xs font-medium">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+                All Employees
+              </span>
+              {% else %}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/50 text-amber-300 text-xs font-medium">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                {{ notice.target_emp_id }}
+              </span>
+              {% endif %}
+            </div>
+            <span class="text-xs text-gray-500 flex-shrink-0">{{ notice.timestamp.strftime('%d %b %Y, %H:%M') }}</span>
+          </div>
+          <p class="text-sm text-gray-200 leading-relaxed">{{ notice.message }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="p-12 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-surface-800 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+        </div>
+        <p class="text-gray-500 text-sm">No notices sent yet. Compose your first announcement!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

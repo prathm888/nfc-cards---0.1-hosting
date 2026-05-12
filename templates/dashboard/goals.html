@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Daily Goals — Dashboard{% endblock %}
+{% block page_title %}My Daily Goal{% endblock %}
+{% block page_subtitle %}Track your unique scan progress for today{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl space-y-6">
+
+  <!-- Today's Goal Card -->
+  {% if goal %}
+  <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-6">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Today — {{ today.strftime('%d %B %Y') }}</span>
+        <h2 class="text-2xl font-bold text-white mt-1">{{ taps_today }} / {{ goal.target_scans }}</h2>
+        <p class="text-sm text-gray-400 mt-1">unique scans recorded</p>
+      </div>
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center
+                  {% if progress_pct >= 100 %}bg-green-900/40 border border-green-700/40
+                  {% elif progress_pct >= 50 %}bg-amber-900/40 border border-amber-700/40
+                  {% else %}bg-purple-900/40 border border-purple-700/40{% endif %}">
+        <span class="text-lg font-bold
+                     {% if progress_pct >= 100 %}text-green-400
+                     {% elif progress_pct >= 50 %}text-amber-400
+                     {% else %}text-purple-400{% endif %}">
+          {{ progress_pct }}%
+        </span>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="mb-4">
+      <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+        <span>Progress</span>
+        <span>{{ taps_today }} of {{ goal.target_scans }} scans</span>
+      </div>
+      <div class="w-full h-3 bg-surface-800 rounded-full overflow-hidden">
+        <div class="h-full rounded-full transition-all duration-700 ease-out
+                    {% if progress_pct >= 100 %}bg-gradient-to-r from-green-500 to-emerald-400
+                    {% elif progress_pct >= 50 %}bg-gradient-to-r from-amber-500 to-orange-400
+                    {% else %}bg-gradient-to-r from-purple-600 to-indigo-500{% endif %}"
+             style="width: {{ progress_pct }}%"></div>
+      </div>
+    </div>
+
+    {% if progress_pct >= 100 %}
+    <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-900/20 border border-green-700/30 text-green-300 text-sm">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      🎉 Goal Achieved! Great work today!
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Reward Info -->
+  {% if goal.reward_desc %}
+  <div class="bg-surface-900 border border-amber-700/30 rounded-2xl p-5">
+    <div class="flex items-center gap-2 mb-2">
+      <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+      <h3 class="text-sm font-semibold text-amber-300">Today's Reward</h3>
+    </div>
+    <p class="text-sm text-gray-300">{{ goal.reward_desc }}</p>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- No goal today -->
+  <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-12 text-center">
+    <div class="w-16 h-16 rounded-2xl bg-surface-800 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    </div>
+    <h3 class="text-lg font-semibold text-white mb-2">No Goal Set Today</h3>
+    <p class="text-sm text-gray-500">Your admin hasn't set a goal for today yet. Check back later!</p>
+  </div>
+
+  <!-- Still show taps today -->
+  <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-5 flex items-center justify-between">
+    <div>
+      <p class="text-xs text-gray-500 uppercase tracking-wider">Unique Scans Today</p>
+      <p class="text-3xl font-bold text-white mt-1">{{ taps_today }}</p>
+    </div>
+    <div class="w-14 h-14 rounded-xl bg-purple-900/40 border border-purple-700/40 flex items-center justify-center">
+      <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Quick Tips -->
+  <div class="bg-surface-900 border border-purple-900/30 rounded-2xl p-5">
+    <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      Tips to Earn More Scans
+    </h3>
+    <ul class="space-y-2 text-xs text-gray-400">
+      <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span>Share your NFC card QR code on WhatsApp or social media</li>
+      <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span>Present your card at client meetings and events</li>
+      <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span>Each unique visitor = 1 point toward your leaderboard rank</li>
+      <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span>Repeat visits from the same IP don't count — focus on new contacts</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

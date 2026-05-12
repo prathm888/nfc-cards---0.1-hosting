@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Profile & Template — NFC Hub{% endblock %}
+{% block page_title %}Profile & Template{% endblock %}
+{% block page_subtitle %}Customize how your public business card looks{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <!-- Profile Form -->
+  <div class="xl:col-span-2 glass-card p-6">
+    <h2 class="text-lg font-semibold text-white mb-6">Business Profile</h2>
+    <form method="POST" action="{{ url_for('dashboard_profile') }}" enctype="multipart/form-data" class="space-y-5" id="profile-form">
+      <!-- Logo Upload -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Logo / Photo</label>
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-xl overflow-hidden bg-surface-800 border border-purple-900/30 flex items-center justify-center flex-shrink-0">
+            {% if current_user.logo_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + current_user.logo_filename) }}" class="w-full h-full object-cover" id="logo-preview"/>
+            {% else %}
+            <span class="text-2xl font-bold text-purple-400" id="logo-placeholder">{{ (current_user.business_name or current_user.username)[0].upper() }}</span>
+            <img src="" class="w-full h-full object-cover hidden" id="logo-preview"/>
+            {% endif %}
+          </div>
+          <div>
+            <label for="logo" class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600/20 border border-purple-600/30 text-purple-400 text-sm hover:bg-purple-600/30 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Upload Image
+            </label>
+            <input type="file" id="logo" name="logo" accept="image/*" class="hidden" onchange="previewLogo(this)"/>
+            <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 16MB</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="business_name" class="block text-sm font-medium text-gray-300 mb-1.5">Business Name</label>
+          <input type="text" id="business_name" name="business_name" class="input-field" value="{{ current_user.business_name or '' }}" placeholder="Acme Corp"/>
+        </div>
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-300 mb-1.5">Phone</label>
+          <input type="tel" id="phone" name="phone" class="input-field" value="{{ current_user.phone or '' }}" placeholder="+1 555 000 0000"/>
+        </div>
+      </div>
+
+      <div>
+        <label for="bio" class="block text-sm font-medium text-gray-300 mb-1.5">Bio / Tagline</label>
+        <textarea id="bio" name="bio" rows="3" class="input-field resize-none" placeholder="A brief description of your business...">{{ current_user.bio or '' }}</textarea>
+      </div>
+
+      <div>
+        <label for="website" class="block text-sm font-medium text-gray-300 mb-1.5">Website</label>
+        <input type="url" id="website" name="website" class="input-field" value="{{ current_user.website or '' }}" placeholder="https://yoursite.com"/>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label for="linkedin" class="block text-sm font-medium text-gray-300 mb-1.5">LinkedIn URL</label>
+          <input type="url" id="linkedin" name="linkedin" class="input-field" value="{{ current_user.linkedin or '' }}" placeholder="https://linkedin.com/in/..."/>
+        </div>
+        <div>
+          <label for="twitter" class="block text-sm font-medium text-gray-300 mb-1.5">Twitter / X</label>
+          <input type="url" id="twitter" name="twitter" class="input-field" value="{{ current_user.twitter or '' }}" placeholder="https://twitter.com/..."/>
+        </div>
+        <div>
+          <label for="instagram" class="block text-sm font-medium text-gray-300 mb-1.5">Instagram</label>
+          <input type="url" id="instagram" name="instagram" class="input-field" value="{{ current_user.instagram or '' }}" placeholder="https://instagram.com/..."/>
+        </div>
+      </div>
+
+      <button type="submit" id="save-profile-btn" class="btn-primary">Save Profile</button>
+    </form>
+  </div>
+
+  <!-- Theme Picker -->
+  <div class="glass-card p-6">
+    <h2 class="text-lg font-semibold text-white mb-2">Card Theme</h2>
+    <p class="text-xs text-gray-500 mb-5">Choose how your public profile page looks</p>
+    <form method="POST" action="{{ url_for('dashboard_profile') }}" id="theme-form">
+      <input type="hidden" name="card_theme" id="theme-input" value="{{ current_user.card_theme or 'nexus' }}"/>
+      <div class="space-y-3">
+        {% for theme in [('nexus', 'Nexus Dark', 'bg-gradient-to-br from-purple-900 to-indigo-950', 'Futuristic dark purple'),
+                         ('executive', 'Executive', 'bg-gradient-to-br from-slate-100 to-blue-100', 'Clean corporate white'),
+                         ('zen', 'Zen Minimal', 'bg-gradient-to-br from-stone-100 to-orange-50', 'Warm minimal cream')] %}
+        <label class="theme-option cursor-pointer block p-4 rounded-xl border-2 transition-all {% if (current_user.card_theme or 'nexus') == theme[0] %}border-purple-500 bg-purple-900/20{% else %}border-purple-900/30 hover:border-purple-700/50{% endif %}"
+               data-theme="{{ theme[0] }}" onclick="selectTheme('{{ theme[0] }}')">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-8 rounded-lg {{ theme[2] }} flex-shrink-0 shadow-sm border border-white/10"></div>
+            <div>
+              <p class="text-sm font-medium text-white">{{ theme[1] }}</p>
+              <p class="text-xs text-gray-500">{{ theme[3] }}</p>
+            </div>
+            <div class="ml-auto w-4 h-4 rounded-full border-2 {% if (current_user.card_theme or 'nexus') == theme[0] %}border-purple-500 bg-purple-500{% else %}border-gray-600{% endif %} flex-shrink-0" id="radio-{{ theme[0] }}"></div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn-primary w-full mt-5 text-sm">Apply Theme</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function previewLogo(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('logo-preview');
+      const placeholder = document.getElementById('logo-placeholder');
+      preview.src = e.target.result;
+      preview.classList.remove('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function selectTheme(theme) {
+  document.getElementById('theme-input').value = theme;
+  document.querySelectorAll('.theme-option').forEach(el => {
+    const active = el.dataset.theme === theme;
+    el.classList.toggle('border-purple-500', active);
+    el.classList.toggle('bg-purple-900/20', active);
+    el.classList.toggle('border-purple-900/30', !active);
+    document.getElementById(`radio-${el.dataset.theme}`).classList.toggle('bg-purple-500', active);
+    document.getElementById(`radio-${el.dataset.theme}`).classList.toggle('border-purple-500', active);
+    document.getElementById(`radio-${el.dataset.theme}`).classList.toggle('border-gray-600', !active);
+  });
+}
+</script>
+{% endblock %}

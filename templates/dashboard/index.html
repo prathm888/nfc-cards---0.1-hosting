@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — NFC Hub{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ current_user.business_name or current_user.username }}{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+  <div class="stat-card">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-gray-400 text-sm font-medium">Total Taps</span>
+      <div class="w-9 h-9 rounded-lg bg-purple-600/20 flex items-center justify-center">
+        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+      </div>
+    </div>
+    <p class="text-3xl font-bold text-white">{{ total_taps }}</p>
+    <p class="text-xs text-gray-500 mt-1">All time</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-gray-400 text-sm font-medium">Cards Active</span>
+      <div class="w-9 h-9 rounded-lg bg-indigo-600/20 flex items-center justify-center">
+        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+      </div>
+    </div>
+    <p class="text-3xl font-bold text-white">{{ cards | length }}</p>
+    <p class="text-xs text-gray-500 mt-1">NFC cards issued</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-gray-400 text-sm font-medium">Leads Captured</span>
+      <div class="w-9 h-9 rounded-lg bg-emerald-600/20 flex items-center justify-center">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+    </div>
+    <p class="text-3xl font-bold text-white">{{ total_leads }}</p>
+    <p class="text-xs text-gray-500 mt-1">Total contacts collected</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-gray-400 text-sm font-medium">7-Day Taps</span>
+      <div class="w-9 h-9 rounded-lg bg-rose-600/20 flex items-center justify-center">
+        <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+      </div>
+    </div>
+    <p class="text-3xl font-bold text-white">{{ recent_taps }}</p>
+    <p class="text-xs text-gray-500 mt-1">Last 7 days</p>
+  </div>
+</div>
+
+<!-- Cards List -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Your NFC Cards -->
+  <div class="glass-card p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-white">Your NFC Cards</h2>
+      <a href="{{ url_for('dashboard_cards') }}" class="text-sm text-purple-400 hover:text-purple-300 transition-colors">Manage →</a>
+    </div>
+    {% if cards %}
+    <div class="space-y-3">
+      {% for card in cards[:5] %}
+      <div class="flex items-center justify-between p-3 rounded-xl bg-surface-800/60 border border-purple-900/20 hover:border-purple-700/40 transition-colors">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-xs font-bold text-white">
+            {{ loop.index }}
+          </div>
+          <div>
+            <p class="text-sm font-medium text-white">{{ card.label or card.unique_id }}</p>
+            <p class="text-xs text-gray-500">/t/{{ card.unique_id }}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-sm font-semibold text-purple-300">{{ card.tap_count }}</p>
+          <p class="text-xs text-gray-500">taps</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-10 text-gray-500">
+      <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+      <p class="text-sm">No cards yet. Contact admin to get your first NFC card!</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="glass-card p-6">
+    <h2 class="text-lg font-semibold text-white mb-5">Quick Actions</h2>
+    <div class="space-y-3">
+      <a href="{{ url_for('dashboard_profile') }}" class="flex items-center gap-4 p-4 rounded-xl bg-surface-800/60 border border-purple-900/20 hover:border-purple-600/50 hover:bg-purple-900/10 transition-all group">
+        <div class="w-10 h-10 rounded-lg bg-purple-600/20 flex items-center justify-center group-hover:bg-purple-600/30 transition-colors">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-white">Edit Profile & Template</p>
+          <p class="text-xs text-gray-500">Customize your public card page</p>
+        </div>
+      </a>
+      <a href="{{ url_for('dashboard_analytics') }}" class="flex items-center gap-4 p-4 rounded-xl bg-surface-800/60 border border-purple-900/20 hover:border-indigo-600/50 hover:bg-indigo-900/10 transition-all group">
+        <div class="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center group-hover:bg-indigo-600/30 transition-colors">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-white">View Analytics</p>
+          <p class="text-xs text-gray-500">Tap history, devices & browsers</p>
+        </div>
+      </a>
+      <a href="{{ url_for('dashboard_cards') }}" class="flex items-center gap-4 p-4 rounded-xl bg-surface-800/60 border border-purple-900/20 hover:border-emerald-600/50 hover:bg-emerald-900/10 transition-all group">
+        <div class="w-10 h-10 rounded-lg bg-emerald-600/20 flex items-center justify-center group-hover:bg-emerald-600/30 transition-colors">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-white">Update Redirect URL</p>
+          <p class="text-xs text-gray-500">Change where your card links go</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
